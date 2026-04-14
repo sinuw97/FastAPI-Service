@@ -16,6 +16,7 @@ class ArticleResponse(BaseModel):
     subject: Optional[str] = None
     jenjang: Optional[str] = None
     summary: Optional[str] = None
+    relevance_score: Optional[float] = None
 
     class Config:
         from_attributes = True

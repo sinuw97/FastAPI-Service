@@ -65,7 +65,7 @@ def search_content(request: QueryRequest, db: Session = Depends(get_db)):
 
     # Hit SerpAPI Google Scholar
     try:
-        search_results = search_serpapi(user_query)
+        search_results = search_serpapi(user_query, embedding_model)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Gagal mengambil data dari SerpAPI: {str(e)}")
 
