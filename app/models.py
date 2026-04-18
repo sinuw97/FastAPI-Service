@@ -9,7 +9,7 @@ class Query(Base):
     id = Column(Integer, primary_key=True, index=True)
     query_text = Column(Text, nullable=False)
     embedding = Column(Text, nullable=False)
-    createdAt = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
     
     articles = relationship("Article", back_populates="query")
     
@@ -26,6 +26,6 @@ class Article(Base):
     subject = Column(String(100))
     jenjang = Column(String(50))
     summary = Column(Text)
-    createdAt = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     query = relationship("Query", back_populates="articles")

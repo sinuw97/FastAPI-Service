@@ -19,7 +19,7 @@ from app.services.summarize_service import summarize_from_url
 
 router = APIRouter()
 
-SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD"))
+SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.85"))
 
 def serialize_article(article: Article) -> dict:
     return {
@@ -29,7 +29,8 @@ def serialize_article(article: Article) -> dict:
         "authors": article.authors,
         "year": article.year,
         "subject": article.subject,
-        "jenjang": article.jenjang
+        "jenjang": article.jenjang,
+        "relevance_score": None
     }
     
 # Search and Classify Konten
@@ -93,7 +94,8 @@ def search_content(request: QueryRequest, db: Session = Depends(get_db)):
             "authors": item["authors"],
             "year": item["year"],
             "subject": subject,
-            "jenjang": jenjang
+            "jenjang": jenjang,
+            "relevance_score": item["relevance_score"]
         })
 
     if not enriched_articles:

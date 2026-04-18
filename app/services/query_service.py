@@ -1,7 +1,6 @@
 import json
 import numpy as np
 from sqlalchemy.orm import Session
-from datetime import datetime
 from sklearn.metrics.pairwise import cosine_similarity
 
 from app.models import Query
@@ -13,7 +12,6 @@ def save_query(db: Session, query: str, embedding):
   new_query = Query(
     query_text=query,
     embedding=embedding_json,
-    createdAt=datetime.now()
   )
   
   db.add(new_query)

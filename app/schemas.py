@@ -9,7 +9,6 @@ class QueryRequest(BaseModel):
 class ArticleResponse(BaseModel):
     title: str
     url: str
-    type: Optional[str] = None
     abstract: Optional[str] = None
     authors: Optional[List[str]] = []
     year: Optional[str] = None

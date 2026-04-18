@@ -1,7 +1,6 @@
 import requests
 import os
 from dotenv import load_dotenv
-import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 load_dotenv()
@@ -14,14 +13,14 @@ def search_serpapi(query: str, embedding_model):
       "q": query,
       "engine": "google_scholar",
       "hl": "id",
-      "num": 10,
+      "num": 5,
       "api_key": API_KEY
   }
   
-  response = requests.get(API_URL, params=params, timeout=10)
+  response = requests.get(API_URL, params=params, timeout=30)
   
   if response.status_code != 200:
-    raise Exception("Gagal mengambil data dari SarpAPI")
+    raise Exception("Gagal mengambil data dari SerpAPI")
   
   data = response.json()
   results = []
@@ -54,10 +53,10 @@ def search_serpapi(query: str, embedding_model):
         "year": year
     })
 
-    # Semantic re-ranking
-    ranked_results = semantic_rerank(query, results, embedding_model)
+  # Semantic re-ranking
+  ranked_results = semantic_rerank(query, results, embedding_model)
     
-    return ranked_results[:5]
+  return ranked_results[:5]
   
 def semantic_rerank(query: str, results: list, embedding_model) -> list:
   if not results:
@@ -87,4 +86,3 @@ def semantic_rerank(query: str, results: list, embedding_model) -> list:
   scored_results.sort(key=lambda x: x["relevance_score"], reverse=True)
   
   return scored_results
-
