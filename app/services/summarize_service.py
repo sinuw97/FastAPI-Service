@@ -42,7 +42,7 @@ def _post_process(text: str) -> str:
         result += "."
     return result
   
-def _chunk_by_sentences(text: str, sentences_per_chunk: int = 4) -> list:
+def _chunk_by_sentences(text: str, sentences_per_chunk: int = 8) -> list:
     sentences = re.split(r'(?<=\.)\s+', text)
     sentences = [s.strip() for s in sentences if len(s.strip()) > 5]
     chunks = []
@@ -52,7 +52,7 @@ def _chunk_by_sentences(text: str, sentences_per_chunk: int = 4) -> list:
     return chunks
   
 def _find_pdf_url(article_url: str) -> str | None:
-    """Coba temukan link PDF dari halaman artikel."""
+    # Coba temukan link PDF dari halaman artikel
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
@@ -85,7 +85,7 @@ def _find_pdf_url(article_url: str) -> str | None:
     return None
   
 def _extract_text_from_pdf(pdf_url: str) -> str:
-    """Download PDF dan extract teksnya pakai PyMuPDF."""
+    # Download PDF dan extract teksnya pakai PyMuPDF
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
@@ -95,7 +95,7 @@ def _extract_text_from_pdf(pdf_url: str) -> str:
     if "application/pdf" not in response.headers.get("Content-Type", ""):
         raise ValueError("URL bukan PDF yang valid")
 
-    # Baca PDF dari bytes (tidak perlu simpan ke disk)
+    # Baca PDF dari bytes
     pdf_bytes = response.content
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 
@@ -105,9 +105,18 @@ def _extract_text_from_pdf(pdf_url: str) -> str:
 
     doc.close()
 
-    # Ambil maksimal 3000 kata pertama — cukup untuk summarisasi
+    # Ambil maksimal 3000 kata pertama
     words = text.split()
-    return " ".join(words[:3000])
+    # Potong teks mulai dari bagian referensi/daftar pustaka
+    text = re.split(r'\b(daftar pustaka|daftar referensi|references)\b', text, flags=re.IGNORECASE)[0]
+    text = " ".join(words[:3000])
+
+    # Buang baris pendek (noise: nomor halaman, header, dll)
+    lines = text.split('\n')
+    lines = [l.strip() for l in lines if len(l.strip()) > 40]
+    text = " ".join(lines)
+
+    return text
   
 def summarize_from_url(article_url: str) -> str:
     """Fungsi utama — dipanggil dari router."""
@@ -125,7 +134,7 @@ def summarize_from_url(article_url: str) -> str:
     # Summarize
     return summarize(text)
   
-def summarize(text: str, sentences_per_chunk: int = 4) -> str:
+def summarize(text: str, sentences_per_chunk: int = 8) -> str:
     _load_model()
 
     clean_text = text.strip()
@@ -146,7 +155,7 @@ def summarize(text: str, sentences_per_chunk: int = 4) -> str:
             unique.append(p)
     clean_text = " ".join(unique)
 
-    chunks = _chunk_by_sentences(clean_text, sentences_per_chunk)
+    chunks = _chunk_by_sentences(clean_text, sentences_per_chunk=8)
     summary_parts = []
 
     for chunk in chunks:
@@ -162,7 +171,7 @@ def summarize(text: str, sentences_per_chunk: int = 4) -> str:
         summary_ids = _model.generate(
             inputs.input_ids,
             attention_mask=inputs.attention_mask,
-            num_beams=4,
+            num_beams=2,
             min_length=dynamic_min,
             max_length=dynamic_max,
             repetition_penalty=1.3,
