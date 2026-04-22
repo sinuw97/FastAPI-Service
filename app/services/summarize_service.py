@@ -17,8 +17,8 @@ def _load_model():
         return
 
     _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    _tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
-    _model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
+    _tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False, cache_dir="/tmp/huggingface-cache")
+    _model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME, cache_dir="/tmp/huggingface-cache")
     _model.to(_device)
 
     if _device.type == "cuda":
